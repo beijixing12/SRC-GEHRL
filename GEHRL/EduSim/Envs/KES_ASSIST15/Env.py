@@ -25,14 +25,14 @@ from EduSim.spaces import ListSpace
 from EduSim.deep_model import DKTnet
 from EduSim.Envs.meta import Item
 from EduSim.Envs.KES import KESEnv
-from EduSim.utils import get_proj_path, get_graph_embeddings
+from EduSim.utils import get_proj_path, get_graph_embeddings, sample_learning_path
 
 from .meta import KESASSISTScorer
 __all__ = ["KESASSISTEnv"]
 
 
 class KESASSISTEnv(KESEnv):
-    def __init__(self, dataRec_path, seed=None):
+    def __init__(self, dataRec_path, seed=None, path_type=None, path_length=None):
         super().__init__(dataRec_path, seed)
         self.type = 'KES'
         self.env_name = 'KESassist15'
@@ -58,6 +58,22 @@ class KESASSISTEnv(KESEnv):
         self.item_list = [i for i in range(self.num_skills)]
         self.learning_item_base = [Item(item_id=i, knowledge=i) for i in self.item_list]
 
+        target_selector = None
+        if path_type is not None:
+            target_len = path_length if path_length is not None else self.num_skills
+            target_len = max(1, min(target_len, self.num_skills))
+
+            def _selector(rng):
+                return sample_learning_path(
+                    rng,
+                    skill_num=self.num_skills,
+                    path_type=path_type,
+                    length=target_len,
+                    batch_size=1,
+                )[0]
+
+            target_selector = _selector
+
         # DKTnet
         dkt_para_dict = {
             'input_size': self.feature_dim,
@@ -80,7 +96,11 @@ class KESASSISTEnv(KESEnv):
         self.action_space = ListSpace(self.item_list, seed=seed)  # 获得agent的action space
 
         # learners
-        self.learners = KESASSIST15LeanerGroup(self.dataRec_path, seed=seed)  # learners有知识结构图和随机种子两个属性
+        self.learners = KESASSIST15LeanerGroup(
+            self.dataRec_path,
+            seed=seed,
+            target_selector=target_selector,
+        )  # learners有知识结构图和随机种子两个属性
         self._learner = None
         self._initial_score = None
         self.episode_start_time = time.time()

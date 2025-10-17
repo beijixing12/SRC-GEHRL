@@ -13,6 +13,8 @@
 # limitations under the License.
 # ============================================================================
 import os
+from typing import Optional
+
 import numpy as np
 import mindspore
 from mindspore import nn, ops
@@ -155,3 +157,64 @@ def mds_concat(tensor_list, axis):
     else:
         return_thing = mindspore.ops.cat(tensor_list, axis)
     return return_thing
+
+
+def sample_learning_path(
+        random_state: Optional[np.random.RandomState],
+        skill_num: int,
+        path_type: int,
+        length: int,
+        batch_size: int = 1,
+) -> np.ndarray:
+    """Sample concept indices following the SRC path-type heuristics.
+
+    The helper mirrors :func:`generate_path` from the SRC implementation so the
+    GEHRL environment can reuse the same knowledge concept extraction strategy.
+
+    Args:
+        random_state: Random number generator used for reproducibility.
+        skill_num: Total number of concepts available in the environment.
+        path_type: Strategy identifier (0, 1, 2 or 3).
+        length: Number of concepts to return for each sample.
+        batch_size: Number of independent samples to draw.
+
+    Returns:
+        ``np.ndarray`` shaped ``(batch_size, length)`` with concept indices.
+    """
+
+    if skill_num <= 0:
+        raise ValueError("skill_num must be a positive integer")
+    if length <= 0:
+        raise ValueError("length must be a positive integer")
+
+    rng = random_state if random_state is not None else np.random
+
+    def _rand(shape):
+        if hasattr(rng, "random"):
+            return rng.random(shape)
+        return rng.rand(*shape)
+
+    def _randint(high, size):
+        if high <= 0:
+            return np.zeros(size, dtype=int)
+        if hasattr(rng, "integers"):
+            return rng.integers(0, high, size=size)
+        return rng.randint(0, high, size=size)
+
+    if path_type in (0, 1):
+        order = np.argsort(_rand((batch_size, length)), axis=1)
+        if path_type == 1 and skill_num > length:
+            group_count = max(skill_num // length, 1)
+            offsets = _randint(group_count, size=(batch_size, 1))
+            order = order + offsets * length
+        order = np.mod(order, skill_num)
+        result = order
+    else:
+        order = np.argsort(_rand((batch_size, skill_num)), axis=1)
+        take = min(length, order.shape[1])
+        result = order[:, :take]
+        if result.shape[1] < length:
+            pad = np.tile(result[:, -1:], (1, length - result.shape[1]))
+            result = np.concatenate((result, pad), axis=1)
+
+    return result.astype(np.int32, copy=False)
