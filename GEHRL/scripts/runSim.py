@@ -81,6 +81,10 @@ def main():
     parser.add_argument('-e', '--experiment_idx', type=int, default=2, help='Experiment id for one model')
     parser.add_argument('-r', '--repeat_num', type=int, default=1, help='Experiment id for one seed')
     parser.add_argument('-m', '--max_steps', type=int, default=20)
+    parser.add_argument('-p', '--path_type', type=int, choices=[0, 1, 2, 3],
+                        help='Knowledge concept selection strategy shared with SRC.')
+    parser.add_argument('--path_length', type=int,
+                        help='Number of concepts sampled when using --path_type (defaults to max_steps).')
     parser.add_argument('-k', '--know_all_log', type=bool, default=False)
     parser.add_argument('-RC', '--Repe_control', type=bool, default=False)
     parser.add_argument('--grad_clip', type=float, default=0.5)
@@ -149,7 +153,14 @@ def main():
         args['dataRecPath'] = f'{get_raw_data_path()}/ASSISTments2015/processed/'
         args['ppoclip'] = 0.9
     if args['simulator'] == 'KESassist15':
-        env = KESASSISTEnv(dataRec_path=args['dataRecPath'], seed=args['seed'])
+        if args['path_length'] is None:
+            args['path_length'] = args['max_steps']
+        env = KESASSISTEnv(
+            dataRec_path=args['dataRecPath'],
+            seed=args['seed'],
+            path_type=args.get('path_type'),
+            path_length=args.get('path_length'),
+        )
         agent = AbstractAgent(env, args)
 
         env_input_dict = {}

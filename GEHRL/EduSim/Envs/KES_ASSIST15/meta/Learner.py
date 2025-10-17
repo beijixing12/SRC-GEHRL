@@ -21,10 +21,11 @@ from EduSim.Envs.KES.meta.Learner import Learner
 
 
 class KESASSIST15LeanerGroup(KESLearnerGroup):
-    def __init__(self, dataRec_path, seed=None):
+    def __init__(self, dataRec_path, seed=None, target_selector=None):
         super().__init__(dataRec_path, seed)
         self.data_path = dataRec_path
         self.random_state = np.random.RandomState(seed)
+        self._target_selector = target_selector
 
     def __next__(self):
         dataset_number = self.random_state.randint(1, 6)
@@ -39,6 +40,13 @@ class KESASSIST15LeanerGroup(KESLearnerGroup):
                         int(line.rstrip().split(',')[1])] for i, line in enumerate(data)]
             learning_targets = {step[0] for i, step in enumerate(session) if i >= 0.8 * len(session)}
             # learning_target = set(self.random_state.choice(100, self.random_state.randint(3, 10)))
+
+        if self._target_selector is not None:
+            selected = self._target_selector(self.random_state)
+            selected = np.asarray(selected, dtype=np.int32).reshape(-1)
+            custom_targets = {int(idx) for idx in selected if idx >= 0}
+            if custom_targets:
+                learning_targets = custom_targets
         # if len(learning_targets) > 20:
         #     targets_num = random.randint(2, 20)
         #     learning_targets = random.sample(learning_targets, targets_num)

@@ -36,7 +36,7 @@ CIKM2023
 
 # [Environment Requirements](#contents)
 
-- Hardware£¨CPU and GPU£©
+- Hardwareï¿½ï¿½CPU and GPUï¿½ï¿½
     - Prepare hardware environment with CPU processor and GPU of Nvidia.
 - Framework
     - [MindSpore-2.0.0](https://www.mindspore.cn/install/en)
@@ -49,7 +49,7 @@ CIKM2023
   - scikit-learn
   - genism
   
-- For more information, please check the resources below£º
+- For more information, please check the resources belowï¿½ï¿½
   - [MindSpore Tutorials](https://www.mindspore.cn/tutorials/en/master/index.html)
   - [MindSpore Python API](https://www.mindspore.cn/docs/en/master/api_python/mindspore.html)
 
@@ -65,6 +65,10 @@ After installing MindSpore via the official website, you can start training and 
   # After installing MindSpore via the official website, you can start training and evaluation as follows:
   python scripts/runSim.py -s simulator -a model
   ```
+
+  To replicate the knowledge concept extraction heuristics used by SRC, pass
+  ``-p/--path_type`` (0â€“3) when launching ``runSim.py``. Optionally override the
+  number of sampled concepts with ``--path_length``; it defaults to ``--max_steps``.
 # [Script Description](#contents)
 
 ## [Script and Sample Code](#contents)

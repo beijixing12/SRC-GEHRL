@@ -66,6 +66,9 @@ After installing the dependencies, you can start training and evaluation as foll
   # Train the SRC agent with the simulator
   python trainSRC.py -d dataset -p path_type 
   ```
+- To launch the GEHRL baseline with the same datasets, run:
+
+  ```shell
 # [Script Description](#contents)
 
 ## [Script and Sample Code](#contents)
@@ -81,7 +84,7 @@ After installing the dependencies, you can start training and evaluation as foll
     ├─options.py          # Parameter option
     ├─PredictModel.py     # The framework of the prediction model
     ├─utils.py            # Some utility functions
-  ├─Scripts               # Various simulators, baseline models, SRC.
+├─Scripts               # Various simulators, baseline models, SRC.
     ├─__init__.py
     ├─Agent               
       ├─__init__.py
@@ -101,7 +104,7 @@ After installing the dependencies, you can start training and evaluation as foll
   ├─testRule.py           # The performance of three baselines -- random, rule-based, and GRU4Rec -- was tested.
   ├─trainDKT.py           # Train simulator, GRU4Rec 
   ├─trainMPC.py           # Train and validate MPC
-  ├─trainSRC.py           # Train and validate SRC
+├─trainSRC.py           # Train and validate SRC
 ```
 ## [Script Parameters](#contents)
 
@@ -145,7 +148,7 @@ See [Scripts/options.py](./Scripts/options.py) for detailed parameters and expla
 | Simulator       | DKT, CoKT                                                              |
 | Outputs         | Reward                                                                 |
 | Results         | Based on simulator training, it has strong randomness. The comparison of different baselines can be referred to the paper. |
-| Per Step Time   | 40.61 ms                                                               |
+ | Per Step Time   | 40.61 ms                                                               |
 
 # [Description of Random Situation](#contents)
 
